@@ -4,20 +4,23 @@
 
 #include "syscall.h"
 
+
+void print (char c){
+  PutChar (c); 
+  ThreadExit();
+}
+
+
 int
 main ()
 {
 volatile int tr = 1;
 
  while (tr==1){
- ThreadCreate( (void *) PutChar,(void *)'d');
- tr = 0;
- ThreadExit();
-// while(1); 
- } 
-
-
-// Halt();
+  ThreadCreate( print,'d');
+  ThreadExit();
+  tr=0;
+ }
 }
 
 
