@@ -1,0 +1,27 @@
+machine/console.cc:	currentThread->Yield();
+machine/console.cc:	currentThread->Yield();
+machine/interrupt.cc:	currentThread->Yield();
+machine/mipssim.cc:    //       currentThread->getName(), stats->totalTicks);
+machine/mipssim.cc:	     currentThread->getName(), stats->totalTicks);
+threads/main.cc:    currentThread->Finish ();	// NOTE: if the procedure "main" 
+threads/scheduler.cc:    if (currentThread->space != NULL)
+threads/scheduler.cc:	  currentThread->SaveUserState ();	// save the user's CPU registers
+threads/scheduler.cc:	  currentThread->space->SaveState ();
+threads/scheduler.cc:    currentThread->setStatus (RUNNING);	// nextThread is now running
+threads/scheduler.cc:    DEBUG ('t', "Now in thread \"%s\"\n", currentThread->getName ());
+threads/scheduler.cc:    if (currentThread->space != NULL)
+threads/scheduler.cc:	  currentThread->RestoreUserState ();	// to restore, do it.
+threads/scheduler.cc:	  currentThread->space->RestoreState ();
+threads/synch.cc:	  currentThread->Sleep ();
+threads/system.cc:    currentThread->setStatus (RUNNING);
+threads/thread.cc:	space = currentThread->space;
+threads/thread.cc:    currentThread->Finish ();
+threads/thread.cc:  if (currentThread->space != NULL)
+threads/thread.cc:      currentThread->RestoreUserState ();	// to restore, do it.
+threads/thread.cc:      currentThread->space->RestoreState ();
+threads/threadtest.cc:	  currentThread->Yield ();
+userprog/addrspace.cc://      will be saved/restored into the currentThread->userRegisters
+userprog/progtest.cc:    currentThread->space = space;
+userprog/userthread.cc:    machine->WriteRegister (StackReg, currentThread->space->AllocateUserStack());
+userprog/userthread.cc:    DEBUG ('s', "Initializing User stack register to 0x%x\n", currentThread->space->AllocateUserStack());
+userprog/userthread.cc: currentThread->Finish(); 
