@@ -16,8 +16,13 @@
 #include "copyright.h"
 #include "filesys.h"
 #include "translate.h"
+#include "bitmap.h"
 
-#define UserStacksAreaSize		1024	// increase this as necessary!
+#define UserStacksAreaSize	1024	// increase this as necessary!
+#ifdef CHANGED
+#define threadPageNumber 256
+#endif
+
 
 class AddrSpace:dontcopythis
 {
@@ -34,8 +39,9 @@ class AddrSpace:dontcopythis
     void RestoreState ();	// info on a context switch 
 
     #ifdef CHANGED
-    int AllocateUserStack(); //retournant l’adresse du haut de cette nouvelle pile	
-    #endif
+    int AllocateUserStack(int nbrThreads); //retournant l’adresse du haut de cette nouvelle pile	
+	BitMap *bitMap;
+    #endif //CHANGED
 
   private:
       TranslationEntry * pageTable;	// Assume linear page table translation

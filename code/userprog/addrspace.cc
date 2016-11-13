@@ -20,7 +20,9 @@
 #include "addrspace.h"
 #include "noff.h"
 #include "syscall.h"
+#include "bitmap.h"
 #include "new"
+
 
 //----------------------------------------------------------------------
 // SwapHeader
@@ -122,6 +124,9 @@ AddrSpace::AddrSpace (OpenFile * executable)
 	   size - UserStacksAreaSize, UserStacksAreaSize);
 
     pageTable[0].valid = FALSE;			// Catch NULL dereference
+	#ifdef CHANGED
+	bitMap = new BitMap((UserStacksAreaSize/threadPageNumber)-1);
+	#endif //CHANGED
 }
 
 //----------------------------------------------------------------------
@@ -199,10 +204,11 @@ AddrSpace::RestoreState ()
 }
 
 #ifdef CHANGED
-int AddrSpace::AllocateUserStack()
+int AddrSpace::AllocateUserStack(int nbrThreads)
 {
-   unsigned int stack;
-   stack = numPages * PageSize - 256;
+   int stack;
+   stack = (numPages * PageSize - nbrThreads * 256) ;
+   DEBUG ('s', "numPages %d - PageSize %d - stack %d\n", numPages, PageSize, stack );
    return stack;
   
 };

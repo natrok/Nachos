@@ -86,16 +86,16 @@ ExceptionHandler (ExceptionType which)
 		//Ici on define les differents appelles au systeme, il faut les ajoute dans le langue assambleur
 		case SC_PutChar:
 		  {
-		    DEBUG ('s', "Synchconsole, Putchar.\n");
+		    DEBUG ('s', "Synchconsole, Putchar: ");
 		    char addr = machine->ReadRegister (4);
 		    synchconsole->SynchPutChar (addr);
 		    break;
 		  }
 		case SC_PutString:
 		  {
-		    DEBUG ('s', "Synchconsole, PutString.\n");
-                    int addr = machine->ReadRegister (4); //read addrese from noyeu
-	            char putString[MAX_STRING_SIZE];		    
+		    DEBUG ('s', "Synchconsole, PutString: \n");
+            int addr = machine->ReadRegister (4); //read addrese from noyeu
+	        char putString[MAX_STRING_SIZE];		    
 		    copyStringFromMachine (addr,  putString, MAX_STRING_SIZE );
 		    synchconsole->SynchPutString (putString);
 		    break;
@@ -121,21 +121,20 @@ ExceptionHandler (ExceptionType which)
 		    break;
 		  }
 		
-		case SC_ThreadCreate:
-		  {
-		  DEBUG ('s', "Entering to ThreadCreate function, Exception.\n");	
-		  	int funct = machine->ReadRegister(4);	  // appelle systeme recupere la function y el parametre
-		  	int args  = machine->ReadRegister(5);		
-		  	do_ThreadCreate (funct,args);
-	          DEBUG ('s', "Getout of ThreadCreate function, Exception.\n");
-		  break;
-		  }
-
 		case SC_ThreadExit:
 		  {
 		    DEBUG ('s', "Entering to ThreadExit function, Exception.\n");
 		    do_ThreadExit();
 		    break;
+		  }
+		  
+		  case SC_ThreadCreate:
+		  {
+		  DEBUG ('s', "Entering to ThreadCreate function, Exception.\n");	
+		  	int funct = machine->ReadRegister(4);	  // appelle systeme recupere la function y el parametre
+		  	int args  = machine->ReadRegister(5);		
+		  	do_ThreadCreate (funct,args);
+		  break;
 		  }
 
 		#endif
