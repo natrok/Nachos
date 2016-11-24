@@ -23,6 +23,8 @@
 #include "bitmap.h"
 #include "new"
 
+static void ReadAtVirtual(OpenFile *executable, int virtualAddr, int numBytes, int position,
+ TranslationEntry *pageTable, unsigned numPages);
 
 //----------------------------------------------------------------------
 // SwapHeader
@@ -93,7 +95,7 @@ AddrSpace::AddrSpace (OpenFile * executable)
     pageTable = new TranslationEntry[numPages];
     for (i = 0; i < numPages; i++)
       {
-	  pageTable[i].physicalPage = i;	// for now, phys page # = virtual page #
+	  pageTable[i].physicalPage = i+1;	// for now, phys page # = virtual page #
 	  pageTable[i].valid = TRUE;
 	  pageTable[i].use = FALSE;
 	  pageTable[i].dirty = FALSE;
@@ -103,30 +105,41 @@ AddrSpace::AddrSpace (OpenFile * executable)
       }
 
 // then, copy in the code and data segments into memory
+/*
     if (noffH.code.size > 0)
       {
-	  DEBUG ('a', "Initializing code segment, at 0x%x, size 0x%x\n",
-		 noffH.code.virtualAddr, noffH.code.size);
+	  DEBUG ('a', "Initializing code segment, at 0x%x, size 0x%x\n", noffH.code.virtualAddr, noffH.code.size);
 	  executable->ReadAt (&(machine->mainMemory[noffH.code.virtualAddr]),
 			      noffH.code.size, noffH.code.inFileAddr);
       }
     if (noffH.initData.size > 0)
       {
-	  DEBUG ('a', "Initializing data segment, at 0x%x, size 0x%x\n",
-		 noffH.initData.virtualAddr, noffH.initData.size);
-	  executable->ReadAt (&
-			      (machine->mainMemory
-			       [noffH.initData.virtualAddr]),
+	  DEBUG ('a', "Initializing data segment, at 0x%x, size 0x%x\n", noffH.initData.virtualAddr, noffH.initData.size);
+	  executable->ReadAt (&(machine->mainMemory[noffH.initData.virtualAddr]),
 			      noffH.initData.size, noffH.initData.inFileAddr);
       }
+*/
 
-    DEBUG ('a', "Area for stacks at 0x%x, size 0x%x\n",
-	   size - UserStacksAreaSize, UserStacksAreaSize);
+#ifdef CHANGED
 
+   if (noffH.code.size > 0){
+	DEBUG ('a', "Initializing code segment, at virtual adresse 0x%x, size 0x%x\n", noffH.code.virtualAddr, noffH.code.size);	
+	ReadAtVirtual(executable, noffH.code.virtualAddr, noffH.code.size,  noffH.code.inFileAddr, pageTable, numPages);
+   }
+
+   if (noffH.initData.size > 0){
+	DEBUG ('a', "Initializing data segment, at virtual adresse 0x%x, size 0x%x\n", noffH.initData.virtualAddr, noffH.initData.size);
+	ReadAtVirtual(executable, noffH.initData.virtualAddr, noffH.initData.size,  noffH.initData.inFileAddr, pageTable, numPages);
+   } 
+	
+
+   bitMap = new BitMap((UserStacksAreaSize/threadPageNumber)-1);
+#endif //CHANGED
+
+    DEBUG ('a', "Area for stacks at 0x%x, size 0x%x\n", size - UserStacksAreaSize, UserStacksAreaSize);
     pageTable[0].valid = FALSE;			// Catch NULL dereference
-	#ifdef CHANGED
-	bitMap = new BitMap((UserStacksAreaSize/threadPageNumber)-1);
-	#endif //CHANGED
+
+
 }
 
 //----------------------------------------------------------------------
@@ -161,7 +174,7 @@ AddrSpace::InitRegisters ()
 	machine->WriteRegister (i, 0);
 
     // Initial program counter -- must be location of "Start"
-    machine->WriteRegister (PCReg, USER_START_ADDRESS);
+      machine->WriteRegister (PCReg, USER_START_ADDRESS);
 
     // Need to also tell MIPS where next instruction is, because
     // of branch delay possibility
@@ -212,4 +225,34 @@ int AddrSpace::AllocateUserStack(int nbrThreads)
    return stack;
   
 };
+
+
+
+static void ReadAtVirtual(OpenFile *executable, int virtualAddr, int numBytes, int position,
+ TranslationEntry *pageTable, unsigned numPages){
+
+ DEBUG ('a', "Initializing code segment, at 0x%x, size%x\n",virtualAddr, numBytes);
+ char tampon[numBytes];
+ executable->ReadAt(&tampon, numBytes, position);
+
+ unsigned numPagesOrig = machine-> pageTableSize;
+ TranslationEntry *pageTableOrig = machine->pageTable;
+
+//en écrivant dans l’espace d’adressage virtuel défini par la table des pages pageTable 
+//de taille numPages
+
+ machine->pageTable = pageTable; 
+ machine->pageTableSize = numPages;
+
+ for(int i = 0; i < numBytes; i++)
+    machine->WriteMem(virtualAddr + i, 1, tampon[i]);	
+
+ machine->pageTable = pageTableOrig; //RestoreState restaura las paginas
+ machine->pageTableSize = numPagesOrig;
+
+ return;
+
+}
+
+
 #endif
