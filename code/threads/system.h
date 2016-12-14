@@ -17,6 +17,7 @@
 #include "timer.h"
 #include "syscall.h"
 
+
 // Initialization and cleanup routines
 extern void Initialize (int argc, char **argv);	// Initialization,
 						// called before anything else
@@ -43,9 +44,13 @@ extern Machine *machine;	// user program memory and registers
 #ifdef USER_PROGRAM
 #include "synchconsole.h"
 #include "userthread.h"
+#include "pageprovider.h"
+#include "fork.h"
 extern SynchConsole *synchconsole; // Sychconsole
 extern int do_ThreadCreate(int f, int arg); 
 extern void do_ThreadExit(); 
+extern int ForkExec(const char *s);
+extern PageProvider * pageprovider; // PageProvider
 #endif
 #endif
 

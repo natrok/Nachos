@@ -39,6 +39,7 @@ Machine *machine;		// user program memory and registers
 #ifdef USER_PROGRAM
 // il faut dire que SynchConsole c'est trouve dans le dossier userprog c'est pourquoi on utilise USER_PROGRAM
 SynchConsole *synchconsole;
+PageProvider *pageprovider; // pageprovider
 #endif
 #endif
 
@@ -186,9 +187,13 @@ Initialize (int argc, char **argv)
 #ifdef USER_PROGRAM
     machine = new Machine (debugUserProg);	// this must come first
 #ifdef CHANGED
-    synchconsole = new SynchConsole(NULL,NULL); 
+   pageprovider = new PageProvider(); //creation of page Provider
+   synchconsole = new SynchConsole(NULL,NULL); 
 #endif // CHANGED
 #endif
+
+//NUMPAGES PHISYQUE
+//ASSERT IL N'Y A PLUS PAGE DISPONIBLES
 
 #ifdef FILESYS
     synchDisk = new SynchDisk ("DISK");
@@ -227,10 +232,12 @@ Cleanup ()
 #endif
 
 //Destruction synchconsole
-#ifdef CHANGED
 #ifdef USER_PROGRAM
+#ifdef CHANGED
     delete synchconsole;
     synchconsole = NULL;
+    delete pageprovider;
+    pageprovider = NULL;	
 #endif
 #endif
 

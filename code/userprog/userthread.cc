@@ -7,7 +7,8 @@
 #include <stdint.h>
 
 struct  funcArg{ int function; int args;};
-int countThread = 0;
+unsigned countThread = 0;
+unsigned numThread = 0;
 int cntSUT = 0;
 static Semaphore *SemThread = new Semaphore("SemThread", 1);
 
@@ -86,10 +87,16 @@ void do_ThreadExit (){
  countThread--;
  SemThread->V ();
   
- if (countThread <0){
+
+ if (countThread <= 0){
+
   interrupt->Halt();
- }
+ }else {
+ currentThread->space->~AddrSpace ();
  currentThread->Finish(); 
+ }
+
+
 }
 
 

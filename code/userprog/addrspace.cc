@@ -23,6 +23,7 @@
 #include "bitmap.h"
 #include "new"
 
+
 static void ReadAtVirtual(OpenFile *executable, int virtualAddr, int numBytes, int position,
  TranslationEntry *pageTable, unsigned numPages);
 
@@ -68,7 +69,8 @@ AddrSpace::AddrSpace (OpenFile * executable)
 {
     NoffHeader noffH;
     unsigned int i, size;
-
+	
+   
     executable->ReadAt (&noffH, sizeof (noffH), 0);
     if ((noffH.noffMagic != NOFFMAGIC) &&
 	(WordToHost (noffH.noffMagic) == NOFFMAGIC))
@@ -91,11 +93,20 @@ AddrSpace::AddrSpace (OpenFile * executable)
 
     DEBUG ('a', "Initializing address space, num pages %d, total size 0x%x\n",
 	   numPages, size);
+
+
 // first, set up the translation 
     pageTable = new TranslationEntry[numPages];
     for (i = 0; i < numPages; i++)
       {
-	  pageTable[i].physicalPage = i+1;	// for now, phys page # = virtual page #
+
+ 	 #ifdef CHANGED	  
+	  ASSERT (pageprovider->getEmptyPage() != -1); // On assure qu'il y a de page disponibles
+	  ASSERT (pageprovider->numAvailPage() > 0);
+
+	  pageTable[i].physicalPage = pageprovider->getEmptyPage(); //on utilise la classe pageProvider pour donner un nouveau page
+         // pageTable[i].physicalPage = i+1;	// for now, phys page # = virtual page + 1 #
+ 	  #endif //CHANGED
 	  pageTable[i].valid = TRUE;
 	  pageTable[i].use = FALSE;
 	  pageTable[i].dirty = FALSE;
@@ -133,7 +144,7 @@ AddrSpace::AddrSpace (OpenFile * executable)
    } 
 	
 
-   bitMap = new BitMap((UserStacksAreaSize/threadPageNumber)-1);
+  // bitMap = new BitMap((UserStacksAreaSize/threadPageNumber)-1);
 #endif //CHANGED
 
     DEBUG ('a', "Area for stacks at 0x%x, size 0x%x\n", size - UserStacksAreaSize, UserStacksAreaSize);
@@ -152,6 +163,9 @@ AddrSpace::~AddrSpace ()
   // LB: Missing [] for delete
   // delete pageTable;
   delete [] pageTable;
+  #ifdef CHANGED	
+  delete pageprovider;
+  #endif
   // End of modification
 }
 
@@ -231,7 +245,8 @@ int AddrSpace::AllocateUserStack(int nbrThreads)
 static void ReadAtVirtual(OpenFile *executable, int virtualAddr, int numBytes, int position,
  TranslationEntry *pageTable, unsigned numPages){
 
- DEBUG ('a', "Initializing code segment, at 0x%x, size%x\n",virtualAddr, numBytes);
+ DEBUG ('a', "Initializing virtual code segment, at 0x%x, size%x\n",virtualAddr, numBytes);
+ 
  char tampon[numBytes];
  executable->ReadAt(&tampon, numBytes, position);
 
@@ -247,7 +262,7 @@ static void ReadAtVirtual(OpenFile *executable, int virtualAddr, int numBytes, i
  for(int i = 0; i < numBytes; i++)
     machine->WriteMem(virtualAddr + i, 1, tampon[i]);	
 
- machine->pageTable = pageTableOrig; //RestoreState restaura las paginas
+ machine->pageTable = pageTableOrig; //RestoreState restaura les pages
  machine->pageTableSize = numPagesOrig;
 
  return;

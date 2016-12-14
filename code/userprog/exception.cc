@@ -25,6 +25,7 @@
 #include "system.h"
 #include "syscall.h"
 #include "userthread.h"
+#include "fork.h"
 
 //----------------------------------------------------------------------
 // UpdatePC : Increments the Program Counter register in order to resume
@@ -84,6 +85,13 @@ ExceptionHandler (ExceptionType which)
 		  }
 		#ifdef CHANGED
 		//Ici on define les differents appelles au systeme, il faut les ajoute dans le langue assambleur
+		case SC_Exit:
+		  {
+		    DEBUG ('s', "Exit end of user function: ");
+		    int returnValue = machine->ReadRegister (4);
+		    interrupt->Halt ();
+		    break;
+		  }
 		case SC_PutChar:
 		  {
 		    DEBUG ('s', "Synchconsole, Putchar: ");
@@ -94,7 +102,7 @@ ExceptionHandler (ExceptionType which)
 		case SC_PutString:
 		  {
 		    DEBUG ('s', "Synchconsole, PutString: \n");
-            int addr = machine->ReadRegister (4); //read addrese from noyeu
+            	int addr = machine->ReadRegister (4); //read addrese from noyeu
 	        char putString[MAX_STRING_SIZE];		    
 		    copyStringFromMachine (addr,  putString, MAX_STRING_SIZE );
 		    synchconsole->SynchPutString (putString);
@@ -128,7 +136,7 @@ ExceptionHandler (ExceptionType which)
 		    break;
 		  }
 		  
-		  case SC_ThreadCreate:
+		case SC_ThreadCreate:
 		  {
 		  DEBUG ('s', "Entering to ThreadCreate function, Exception.\n");	
 		  	int funct = machine->ReadRegister(4);	  // appelle systeme recupere la function y el parametre
@@ -136,6 +144,22 @@ ExceptionHandler (ExceptionType which)
 		  	do_ThreadCreate (funct,args);
 		  break;
 		  }
+
+		case SC_ForkExec:
+		  {
+		  DEBUG ('s', "Entering to ForkExec function, Exception.\n");
+		
+		  int from;
+		  char args[MAX_STRING_SIZE];
+		  
+		  from  = machine->ReadRegister(4);	
+		  copyStringFromMachine (from,  args, MAX_STRING_SIZE );
+		  //ThreadCreate(ForkExec,args);
+		  ForkExec (args);
+
+		  break;
+		  }
+
 
 		#endif
 		default:

@@ -18,6 +18,7 @@
 #include "translate.h"
 #include "bitmap.h"
 
+
 #define UserStacksAreaSize	1024	// increase this as necessary!
 #ifdef CHANGED
 #define threadPageNumber 256

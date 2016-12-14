@@ -19,8 +19,8 @@ int i;
 int
 main ()
 {
- print('a',4);
- Halt();
+ print('a',6);
+ return 0;
 }
 
 
