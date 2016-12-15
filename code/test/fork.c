@@ -6,10 +6,10 @@
 
 int main ()
 {
-//ThreadCreate( ForkExec,"../test/putchar");
+
 ForkExec("../test/putchar");
-ForkExec("../test/putchar");
-//while(1);
+ForkExec("../test/userpages1");
+while(1);
 }
 #endif //CHANGED
 

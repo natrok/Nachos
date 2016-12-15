@@ -40,6 +40,7 @@ Machine *machine;		// user program memory and registers
 // il faut dire que SynchConsole c'est trouve dans le dossier userprog c'est pourquoi on utilise USER_PROGRAM
 SynchConsole *synchconsole;
 PageProvider *pageprovider; // pageprovider
+int	numUserThreads;
 #endif
 #endif
 
@@ -91,8 +92,9 @@ void
 Initialize (int argc, char **argv)
 {
     int argCount;
-    const char *debugArgs = "";
+    const char *debugArgs = ""; 
     bool randomYield = FALSE;
+
 
 #ifdef USER_PROGRAM
     bool debugUserProg = FALSE;	// single step user program
@@ -189,6 +191,7 @@ Initialize (int argc, char **argv)
 #ifdef CHANGED
    pageprovider = new PageProvider(); //creation of page Provider
    synchconsole = new SynchConsole(NULL,NULL); 
+   numUserThreads =0;
 #endif // CHANGED
 #endif
 
@@ -231,13 +234,13 @@ Cleanup ()
     machine = NULL;
 #endif
 
-//Destruction synchconsole
+//Destruction
 #ifdef USER_PROGRAM
 #ifdef CHANGED
     delete synchconsole;
     synchconsole = NULL;
     delete pageprovider;
-    pageprovider = NULL;	
+    pageprovider = NULL;
 #endif
 #endif
 

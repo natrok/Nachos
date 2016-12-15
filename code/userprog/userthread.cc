@@ -7,10 +7,7 @@
 #include <stdint.h>
 
 struct  funcArg{ int function; int args;};
-unsigned countThread = 0;
-unsigned numThread = 0;
-int cntSUT = 0;
-static Semaphore *SemThread = new Semaphore("SemThread", 1);
+static Semaphore *mutexThread = new Semaphore("mutexThread", 1);
 
 
 //----------------------------------------------------------------------
@@ -20,7 +17,6 @@ static Semaphore *SemThread = new Semaphore("SemThread", 1);
 static void StartUserThread(void *schmurtz)
 {
 
-    cntSUT ++;
     funcArg *vars = (struct funcArg *) (schmurtz);
 	
 	DEBUG('s', " Entering to StartUserThread \n");
@@ -31,7 +27,7 @@ static void StartUserThread(void *schmurtz)
     for (int i = 0; i < NumTotalRegs; i++)
 	machine->WriteRegister (i, 0);
     
-	int topAdress = currentThread->space->AllocateUserStack(cntSUT);
+	int topAdress = currentThread->space->AllocateUserStack(numUserThreads);
     
 	DEBUG ('s', "Initializing User stack register to 0x%x\n", topAdress);
 	
@@ -66,11 +62,15 @@ int do_ThreadCreate (int f, int arg){
  myThread->args =  arg;
 
  Thread *t = new Thread ("NouveauUserThread");  
- t->Start (StartUserThread, myThread);  
  
- SemThread->P ();
- countThread++;
- SemThread->V ();
+ mutexThread->P ();
+ numUserThreads++;
+ mutexThread->V ();
+ 
+ t->Start (StartUserThread, myThread);  
+ StartUserThread(myThread);
+ 
+
  
  return 0;
 };
@@ -83,20 +83,17 @@ int do_ThreadCreate (int f, int arg){
 void do_ThreadExit (){
  DEBUG ('t', "Entering do_ThreadExit\n");
  
- SemThread->P ();
- countThread--;
- SemThread->V ();
+ mutexThread->P ();
+ numUserThreads--;
+ mutexThread->V ();
   
-
- if (countThread <= 0){
-
-  interrupt->Halt();
- }else {
- currentThread->space->~AddrSpace ();
- currentThread->Finish(); 
+ if (numUserThreads <= 0){
+    interrupt->Halt();
+ }else {	 
+   currentThread->Finish(); 
+   currentThread->space->~AddrSpace();
+   delete currentThread->space;
  }
-
-
 }
 
 

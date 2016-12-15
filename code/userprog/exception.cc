@@ -80,21 +80,21 @@ ExceptionHandler (ExceptionType which)
 		case SC_Halt:
 		  {
 		    DEBUG ('s', "Shutdown, initiated by user program.\n");
-		    interrupt->Halt ();
+			interrupt->Halt ();
 		    break;
 		  }
 		#ifdef CHANGED
 		//Ici on define les differents appelles au systeme, il faut les ajoute dans le langue assambleur
 		case SC_Exit:
 		  {
-		    DEBUG ('s', "Exit end of user function: ");
-		    int returnValue = machine->ReadRegister (4);
-		    interrupt->Halt ();
+		    DEBUG ('s', "Exit, End of user function \n");
+		    int exitStatus = machine->ReadRegister (4);
+			do_ThreadExit();
 		    break;
 		  }
 		case SC_PutChar:
 		  {
-		    DEBUG ('s', "Synchconsole, Putchar: ");
+		    DEBUG ('s', "\n Synchconsole, Putchar: ");
 		    char addr = machine->ReadRegister (4);
 		    synchconsole->SynchPutChar (addr);
 		    break;
@@ -154,9 +154,7 @@ ExceptionHandler (ExceptionType which)
 		  
 		  from  = machine->ReadRegister(4);	
 		  copyStringFromMachine (from,  args, MAX_STRING_SIZE );
-		  //ThreadCreate(ForkExec,args);
 		  ForkExec (args);
-
 		  break;
 		  }
 

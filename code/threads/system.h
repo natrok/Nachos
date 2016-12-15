@@ -34,6 +34,7 @@ extern Timer *timer;		// the hardware alarm clock
 extern int copyStringToMachine(int to, char *from,  unsigned size);
 extern int copyStringFromMachine(int from, char *to,  unsigned size);
 const int MAX_STRING_SIZE = 120;   //buffer local
+extern int numUserThreads;
 
 #ifdef USER_PROGRAM
 #include "machine.h"
